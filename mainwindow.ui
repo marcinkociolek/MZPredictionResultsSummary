@@ -146,6 +146,16 @@
      </rect>
     </property>
    </widget>
+   <widget class="QSpinBox" name="spinBoxPredictedFileToShow">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>120</y>
+      <width>43</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
