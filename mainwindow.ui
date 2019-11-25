@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>926</width>
+    <width>994</width>
     <height>716</height>
    </rect>
   </property>
@@ -92,6 +92,9 @@
       <height>21</height>
      </rect>
     </property>
+    <property name="text">
+     <string>Gabor_l26f3</string>
+    </property>
    </widget>
    <widget class="QLabel" name="labelFilename">
     <property name="geometry">
@@ -116,44 +119,50 @@
      </rect>
     </property>
    </widget>
-   <widget class="QTextEdit" name="textEditMzFeaturesFiles">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>160</y>
-      <width>251</width>
-      <height>311</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QTextEdit" name="textEditPredictorOutFiles">
-    <property name="geometry">
-     <rect>
-      <x>270</x>
-      <y>160</y>
-      <width>251</width>
-      <height>311</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QTextEdit" name="textEditOutFileContent">
     <property name="geometry">
      <rect>
-      <x>530</x>
-      <y>160</y>
-      <width>251</width>
+      <x>340</x>
+      <y>150</y>
+      <width>621</width>
       <height>311</height>
      </rect>
     </property>
    </widget>
-   <widget class="QSpinBox" name="spinBoxPredictedFileToShow">
+   <widget class="QListWidget" name="listWidgetPredictorOutFiles">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>10</x>
+      <y>150</y>
+      <width>321</width>
+      <height>311</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxShowPredictionDetails">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
       <y>120</y>
-      <width>43</width>
+      <width>141</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Show Prediction Details</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonProcessAllFiles">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>120</y>
+      <width>121</width>
       <height>22</height>
      </rect>
+    </property>
+    <property name="text">
+     <string>Process All Files</string>
     </property>
    </widget>
   </widget>
@@ -162,7 +171,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>926</width>
+     <width>994</width>
      <height>21</height>
     </rect>
    </property>

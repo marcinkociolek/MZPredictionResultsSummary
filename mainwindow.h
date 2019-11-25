@@ -33,7 +33,7 @@ public:
 
     void OpenPredictorOutputFotder();
     void OutputFotder();
-    void ShowResult();
+    std::string ShowResult(std::string FileNameStr, bool autoClear = true);
     //string EvaluatePrediction(int fileNrToProcess,std::vector<std::string> PredictorOutputFileNamesVector);
 
 private slots:
@@ -41,7 +41,9 @@ private slots:
 
     void on_pushButtonOpenOutFolder_clicked();
 
-    void on_spinBoxPredictedFileToShow_valueChanged(int arg1);
+    void on_listWidgetPredictorOutFiles_currentTextChanged(const QString &currentText);
+
+    void on_pushButtonProcessAllFiles_clicked();
 
 private:
     Ui::MainWindow *ui;

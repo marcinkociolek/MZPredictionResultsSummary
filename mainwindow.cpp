@@ -52,11 +52,34 @@ string StringVectorToString(std::vector<std::string> FileNamesVector)
 
     return OutStr;
 }
-
 //------------------------------------------------------------------------------------------------------------------------------
-string EvaluatePrediction(path PredictedFileToProcess)
+QList<QString> StringVectorQStringQList(std::vector<std::string> FileNamesVector)
+{
+    QList<QString> OutQList;
+    if(FileNamesVector.empty())
+        return OutQList;
+    for(vector<string>::iterator iFileNamesVector = FileNamesVector.begin(); iFileNamesVector != FileNamesVector.end(); iFileNamesVector++)
+    {
+        OutQList.append(QString::fromStdString(*iFileNamesVector));
+    }
+
+    return OutQList;
+}
+//------------------------------------------------------------------------------------------------------------------------------
+string EvaluatePrediction(path PredictedFileToProcess, bool verboseMode = 0)
 {
     string OutStr = "";
+    if(verboseMode)
+    {
+        OutStr += "\n";
+        OutStr += "File\t";
+        OutStr += "#Samples\t";
+        OutStr += "#Error\t";
+        OutStr += "Error[%]\n";
+    }
+
+
+    string OutStr1 = "";
     if(!exists(PredictedFileToProcess))
         return "file" + PredictedFileToProcess.string() + "does not exists";
 
@@ -109,28 +132,34 @@ string EvaluatePrediction(path PredictedFileToProcess)
             errorCount++;
         }
 
-        OutStr += to_string(samplesCount)
-                  + "-" + predictedInt
-                  + "-" + predictedStr
-                  + "-" + trueStr
-                  + "-" + Result
+        OutStr1 += to_string(samplesCount)
+                  + "\t" + predictedInt
+                  + "\t" + predictedStr
+                  + "\t" + trueStr
+                  + "\t" + Result
                   + "\n";
 
     }
-    OutStr += "\n";
-    OutStr += "-----------------------\n";
-    OutStr += "     Summatu\n";
-    OutStr += "-----------------------\n";
-
-    OutStr += "Samples Count " + to_string(samplesCount) + "\n";
-    OutStr += "Error Count " + to_string(errorCount) + "\n";
+    OutStr += PredictedFileToProcess.stem().string() + "\t";
+    OutStr += to_string(samplesCount) + "\t";
+    OutStr += to_string(errorCount) + "\t";
     if(samplesCount)
     {
        double errorPerc = (double)errorCount/(double)samplesCount * 100.0;
-       OutStr += "Error % " + to_string(errorPerc) + "\n";
+       OutStr += to_string(errorPerc) + "\n";
     }
     else
-        OutStr += "Error % -1\n";
+        OutStr += "-1\n";
+
+    if(verboseMode)
+    {
+        OutStr += "\n";
+        OutStr += "-----------------------\n";
+        OutStr += "     Details\n";
+        OutStr += "-----------------------\n";
+
+        OutStr += OutStr1;
+    }
 
 
     inFile.close();
@@ -167,11 +196,12 @@ void MainWindow::OpenPredictorOutputFotder()
     }
     ui->lineEditPredictorOutputFolder->setText(QString::fromStdString(PredictorOutputFolder.string()));
     ReadFolder(PredictorOutputFolder, &PredictorOutputFileNamesVector);
-    ui->textEditPredictorOutFiles->clear();
-    ui->textEditPredictorOutFiles->append(QString::fromStdString(StringVectorToString(PredictorOutputFileNamesVector)));
-    int nrOfFiles = PredictorOutputFileNamesVector.size();
-    ui->spinBoxPredictedFileToShow->setMaximum(nrOfFiles-1);
-    ShowResult();
+
+
+    ui->listWidgetPredictorOutFiles->clear();
+    ui->listWidgetPredictorOutFiles->addItems(StringVectorQStringQList(PredictorOutputFileNamesVector));
+    if(ui->listWidgetPredictorOutFiles->count())
+        ui->listWidgetPredictorOutFiles->setCurrentRow(0);
 
 }
 //------------------------------------------------------------------------------------------------------------------------------
@@ -183,24 +213,21 @@ void MainWindow::OutputFotder()
     }
     if (!is_directory(OutputFolder))
     {
-        ui->textEditOut->append(QString::fromStdString( "Output folder : " + PredictorOutputFolder.string()+ " This is not a directory path "));
+        ui->textEditOut->append(QString::fromStdString( "Output folder : " + OutputFolder.string()+ " This is not a directory path "));
     }
-    ui->lineEditPredictorOutputFolder->setText(QString::fromStdString(PredictorOutputFolder.string()));
+    ui->lineEditOutFolder->setText(QString::fromStdString(OutputFolder.string()));
 
 }
 //------------------------------------------------------------------------------------------------------------------------------
-void MainWindow::ShowResult()
+string MainWindow::ShowResult(string FileNameStr, bool autoClear)
 {
-
-    if(!PredictorOutputFileNamesVector.size())
-        return;
-    unsigned long long fileNrToProcess = ui->spinBoxPredictedFileToShow->value();
     path PredictorOutputFile = PredictorOutputFolder;
-    PredictorOutputFile.append(PredictorOutputFileNamesVector[fileNrToProcess]);
-    string OutText =  EvaluatePrediction(PredictorOutputFile);
-    ui->textEditOutFileContent->clear();
-    ui->textEditOutFileContent->setText(QString::fromStdString(OutText));
-
+    PredictorOutputFile.append(FileNameStr);
+    string OutText =  EvaluatePrediction(PredictorOutputFile, ui->checkBoxShowPredictionDetails->checkState());
+    if(autoClear)
+        ui->textEditOutFileContent->clear();
+    ui->textEditOutFileContent->append(QString::fromStdString(OutText));
+    return OutText;
 }
 //------------------------------------------------------------------------------------------------------------------------------
 
@@ -243,7 +270,51 @@ void MainWindow::on_pushButtonOpenOutFolder_clicked()
     OutputFotder();
 }
 
-void MainWindow::on_spinBoxPredictedFileToShow_valueChanged(int arg1)
+
+void MainWindow::on_listWidgetPredictorOutFiles_currentTextChanged(const QString &currentText)
 {
-    ShowResult();
+    ShowResult(currentText.toStdString());
+
+}
+
+
+
+
+
+void MainWindow::on_pushButtonProcessAllFiles_clicked()
+{
+    string OutText = "";
+    OutText += PredictorOutputFolder.string();
+
+    OutText += "\n";
+    OutText += "File\t";
+    OutText += "#Samples\t";
+    OutText += "#Error\t";
+    OutText += "Error[%]\n";
+
+    ui->textEditOutFileContent->clear();
+
+    if(PredictorOutputFileNamesVector.empty())
+    {
+        ui->textEditOut->append("no files to proces ");
+        return;
+    }
+    for(vector<string>::iterator iFileNamesVector = PredictorOutputFileNamesVector.begin(); iFileNamesVector != PredictorOutputFileNamesVector.end(); iFileNamesVector++)
+    {
+        OutText += ShowResult(*iFileNamesVector, 0);
+    }
+
+    path OutFile = OutputFolder;
+    OutFile.append(ui->lineEditFileName->text().toStdString() + ".xls");
+
+    std::ofstream outFile (OutFile.string());
+    if (!outFile.is_open())
+    {
+        ui->textEditOut->append("unable to open :" + QString::fromStdString(OutFile.string()));
+        return;
+    }
+    outFile << OutText;
+    outFile.close();
+
+
 }
