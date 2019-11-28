@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>QMaZda Prediction Results Summary</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QPushButton" name="pushButtonOpenPredictorOutputFolder">
@@ -82,6 +82,9 @@
       <height>21</height>
      </rect>
     </property>
+    <property name="text">
+     <string/>
+    </property>
    </widget>
    <widget class="QLineEdit" name="lineEditFileName">
     <property name="geometry">
@@ -93,7 +96,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Gabor_l26f3</string>
+     <string/>
     </property>
    </widget>
    <widget class="QLabel" name="labelFilename">
@@ -142,7 +145,7 @@
    <widget class="QCheckBox" name="checkBoxShowPredictionDetails">
     <property name="geometry">
      <rect>
-      <x>160</x>
+      <x>130</x>
       <y>120</y>
       <width>141</width>
       <height>20</height>
@@ -155,7 +158,7 @@
    <widget class="QPushButton" name="pushButtonProcessAllFiles">
     <property name="geometry">
      <rect>
-      <x>340</x>
+      <x>840</x>
       <y>120</y>
       <width>121</width>
       <height>22</height>
@@ -163,6 +166,87 @@
     </property>
     <property name="text">
      <string>Process All Files</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEditFeatureFamily">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>120</y>
+      <width>113</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Gabor</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelFeatureFamily">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>100</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Feature Family</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxUseSubfolders">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>120</y>
+      <width>101</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Use Subfolders</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEditImageClass">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>120</y>
+      <width>113</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>l26f3</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelImageDistortion">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>100</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Image class</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonReload">
+    <property name="geometry">
+     <rect>
+      <x>750</x>
+      <y>120</y>
+      <width>80</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Reload</string>
     </property>
    </widget>
   </widget>

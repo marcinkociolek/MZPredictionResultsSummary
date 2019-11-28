@@ -186,38 +186,36 @@ MainWindow::~MainWindow()
 //------------------------------------------------------------------------------------------------------------------------------
 void MainWindow::OpenPredictorOutputFotder()
 {
+    ui->textEditOut->clear();
+    ui->listWidgetPredictorOutFiles->clear();
+    PredictorOutputFileNamesVector.clear();
+
+    PredictorOutputFolder = path(ui->lineEditPredictorOutputFolder->text().toStdString());
+
+    if(ui->checkBoxUseSubfolders->checkState())
+    {
+        PredictorOutputFolder.append(ui->lineEditFeatureFamily->text().toStdString());
+        PredictorOutputFolder.append(ui->lineEditImageClass->text().toStdString());
+    }
+
     if (!exists(PredictorOutputFolder))
     {
         ui->textEditOut->append(QString::fromStdString("Predictor Output folder : " + PredictorOutputFolder.string()+ " not exists "));
+        return;
     }
     if (!is_directory(PredictorOutputFolder))
     {
         ui->textEditOut->append(QString::fromStdString( "Predicto rOutput folder : " + PredictorOutputFolder.string()+ " This is not a directory path "));
+        return;
     }
-    ui->lineEditPredictorOutputFolder->setText(QString::fromStdString(PredictorOutputFolder.string()));
     ReadFolder(PredictorOutputFolder, &PredictorOutputFileNamesVector);
 
-
-    ui->listWidgetPredictorOutFiles->clear();
     ui->listWidgetPredictorOutFiles->addItems(StringVectorQStringQList(PredictorOutputFileNamesVector));
     if(ui->listWidgetPredictorOutFiles->count())
         ui->listWidgetPredictorOutFiles->setCurrentRow(0);
 
 }
-//------------------------------------------------------------------------------------------------------------------------------
-void MainWindow::OutputFotder()
-{
-    if (!exists(OutputFolder))
-    {
-        ui->textEditOut->append(QString::fromStdString("Output folder : " + OutputFolder.string()+ " not exists "));
-    }
-    if (!is_directory(OutputFolder))
-    {
-        ui->textEditOut->append(QString::fromStdString( "Output folder : " + OutputFolder.string()+ " This is not a directory path "));
-    }
-    ui->lineEditOutFolder->setText(QString::fromStdString(OutputFolder.string()));
 
-}
 //------------------------------------------------------------------------------------------------------------------------------
 string MainWindow::ShowResult(string FileNameStr, bool autoClear)
 {
@@ -244,11 +242,16 @@ void MainWindow::on_pushButtonOpenPredictorOutputFolder_clicked()
 {
     QFileDialog dialog(this, "Open Folder");
     dialog.setFileMode(QFileDialog::Directory);
-    dialog.setDirectory(QString::fromStdString(PredictorOutputFolder.string()));
+
+    path tempDir = path(ui->lineEditPredictorOutputFolder->text().toStdString());
+    if(exists(tempDir) && is_directory(tempDir))
+    {
+        dialog.setDirectory( QString::fromStdString(tempDir.string()));
+    }
 
     if(dialog.exec())
     {
-        PredictorOutputFolder = dialog.directory().path().toStdWString();
+        ui->lineEditPredictorOutputFolder->setText(dialog.directory().path());
     }
     else
         return;
@@ -261,13 +264,31 @@ void MainWindow::on_pushButtonOpenOutFolder_clicked()
     dialog.setFileMode(QFileDialog::Directory);
     dialog.setDirectory(QString::fromStdString(OutputFolder.string()));
 
+    path tempDir = path(ui->lineEditOutFolder->text().toStdString());
+    if(exists(tempDir) && is_directory(tempDir))
+    {
+        dialog.setDirectory( QString::fromStdString(tempDir.string()));
+    }
+
     if(dialog.exec())
     {
-        OutputFolder = dialog.directory().path().toStdWString();
+        OutputFolder = path(dialog.directory().path().toStdWString());
     }
     else
         return;
-    OutputFotder();
+    ui->lineEditOutFolder->setText(QString::fromStdString( OutputFolder.string()));
+    if (!exists(OutputFolder))
+    {
+        ui->textEditOut->append(QString::fromStdString("Output folder : " + OutputFolder.string()+ " not exists "));
+        return;
+    }
+    if (!is_directory(OutputFolder))
+    {
+        ui->textEditOut->append(QString::fromStdString( "Output folder : " + OutputFolder.string()+ " This is not a directory path "));
+        return;
+    }
+
+
 }
 
 
@@ -283,6 +304,8 @@ void MainWindow::on_listWidgetPredictorOutFiles_currentTextChanged(const QString
 
 void MainWindow::on_pushButtonProcessAllFiles_clicked()
 {
+    OpenPredictorOutputFotder();
+
     string OutText = "";
     OutText += PredictorOutputFolder.string();
 
@@ -305,8 +328,29 @@ void MainWindow::on_pushButtonProcessAllFiles_clicked()
     }
 
     path OutFile = OutputFolder;
-    OutFile.append(ui->lineEditFileName->text().toStdString() + ".xls");
 
+    if(ui->checkBoxUseSubfolders->checkState())
+    {
+        OutFile.append(ui->lineEditFileName->text().toStdString() +
+                       ui->lineEditFeatureFamily->text().toStdString() +
+                       string("_") +
+                       ui->lineEditImageClass->text().toStdString() +
+                       ".xls");
+    }
+    else
+    {
+        OutFile.append(ui->lineEditFileName->text().toStdString() + ".xls");
+    }
+    if (!exists(OutputFolder))
+    {
+        ui->textEditOut->append(QString::fromStdString("Output folder : " + OutputFolder.string()+ " not exists "));
+        return;
+    }
+    if (!is_directory(OutputFolder))
+    {
+        ui->textEditOut->append(QString::fromStdString( "Output folder : " + OutputFolder.string()+ " This is not a directory path "));
+        return;
+    }
     std::ofstream outFile (OutFile.string());
     if (!outFile.is_open())
     {
@@ -317,4 +361,9 @@ void MainWindow::on_pushButtonProcessAllFiles_clicked()
     outFile.close();
 
 
+}
+
+void MainWindow::on_pushButtonReload_clicked()
+{
+    OpenPredictorOutputFotder();
 }
