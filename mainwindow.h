@@ -16,12 +16,14 @@ class MainWindow : public QMainWindow
 public:
 
     boost::filesystem::path MzFeaturesOutFolder;
+    boost::filesystem::path PredictorOutputFolderRoot;
     boost::filesystem::path PredictorOutputFolder;
     boost::filesystem::path OutputFolder;
 
     std::vector<std::string> PredictorOutputFileNamesVector;
 
     std::vector<int> PredictedClassIntVector;
+    std::vector<std::string> SubfoldersNamesVector;
     std::vector<std::string> PredictedClassStrVector;
     std::vector<std::string> TrueClassStrVector;
 
@@ -31,6 +33,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    bool ReadPredictorSubfolders();
     void OpenPredictorOutputFotder();
     std::string ShowResult(std::string FileNameStr, bool autoClear = true);
     //string EvaluatePrediction(int fileNrToProcess,std::vector<std::string> PredictorOutputFileNamesVector);
@@ -45,6 +48,8 @@ private slots:
     void on_pushButtonProcessAllFiles_clicked();
 
     void on_pushButtonReload_clicked();
+
+
 
 private:
     Ui::MainWindow *ui;

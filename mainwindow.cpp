@@ -16,6 +16,36 @@ using namespace boost::filesystem;
 //          My functions outside the Mainwindow class
 //------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------
+void ReadSubfolders(path FileFolder, std::vector<std::string> *SubfoldersNamesVector)//, string FilePaternStr = ".+")
+{
+    SubfoldersNamesVector->clear();
+    if (!exists(FileFolder))
+    {
+        return;
+    }
+    if (!is_directory(FileFolder))
+    {
+        return;
+    }
+    //regex FilePattern(FilePaternStr);
+    for (directory_entry& ElementToProcess : directory_iterator(FileFolder))
+    {
+
+        //if (!regex_match(FileToProcess.path().filename().string().c_str(), FilePattern ))
+        //    continue;
+        path PathLocal = ElementToProcess.path();
+        if(is_directory(PathLocal))
+        {
+            SubfoldersNamesVector->push_back(PathLocal.filename().string());
+        }
+    }
+    if(SubfoldersNamesVector->empty())
+        return;
+    std::sort(SubfoldersNamesVector->begin(),SubfoldersNamesVector->end());
+}
+//------------------------------------------------------------------------------------------------------------------------------
+
 void ReadFolder(path FileFolder, std::vector<std::string> *FileNamesVector, string FilePaternStr = ".+")
 {
     FileNamesVector->clear();
@@ -102,12 +132,14 @@ string EvaluatePrediction(path PredictedFileToProcess, bool verboseMode = 0)
     size_t position;
     while(inFile.good())
     {
-        samplesCount++;
+
 
         getline(inFile,Line);
 
         if(Line == "")
             break;
+
+        samplesCount++;
 
         position = Line.find(" ");
         string predictedInt = Line.substr(0,position);
@@ -146,10 +178,10 @@ string EvaluatePrediction(path PredictedFileToProcess, bool verboseMode = 0)
     if(samplesCount)
     {
        double errorPerc = (double)errorCount/(double)samplesCount * 100.0;
-       OutStr += to_string(errorPerc) + "\n";
+       OutStr += to_string(errorPerc);
     }
     else
-        OutStr += "-1\n";
+        OutStr += "-1";
 
     if(verboseMode)
     {
@@ -184,18 +216,55 @@ MainWindow::~MainWindow()
     delete ui;
 }
 //------------------------------------------------------------------------------------------------------------------------------
+bool MainWindow::ReadPredictorSubfolders()
+{
+    PredictorOutputFolderRoot = path(ui->lineEditPredictorOutputFolder->text().toStdWString());
+    SubfoldersNamesVector.clear();
+    ui->listWidgetSubfolders->clear();
+
+    if (!exists(PredictorOutputFolderRoot))
+    {
+        ui->textEditOut->append(QString::fromStdString("Predictor out folder root : " + PredictorOutputFolderRoot.string()+ " not exists "));
+        return 0;
+    }
+    if (!is_directory(PredictorOutputFolderRoot))
+    {
+        ui->textEditOut->append(QString::fromStdString( " Image folder root: " + PredictorOutputFolderRoot.string()+ " This is not a directory path "));
+        return 0;
+    }
+    //PredictorOutputFolderRoot = PredictorOutputFolderRoot;
+    PredictorOutputFolderRoot.append(ui->lineEditFeatureFamily->text().toStdString());
+
+    ReadSubfolders(PredictorOutputFolderRoot, &SubfoldersNamesVector);
+    if(SubfoldersNamesVector.empty())
+        return 0;
+    size_t count = SubfoldersNamesVector.size();
+    for(size_t i = 0; i < count; i++)
+    {
+        ui->listWidgetSubfolders->addItem(QString::fromStdString(SubfoldersNamesVector[i]));
+    }
+    ui->listWidgetSubfolders->setCurrentRow(0);
+    return 1;
+}
+//------------------------------------------------------------------------------------------------------------------------------
 void MainWindow::OpenPredictorOutputFotder()
 {
     ui->textEditOut->clear();
     ui->listWidgetPredictorOutFiles->clear();
     PredictorOutputFileNamesVector.clear();
 
+    if(SubfoldersNamesVector.empty())
+    {
+        ui->textEditOut->append(QString::fromStdString("no subfolders "));
+        return;
+    }
+    int subfolderIndex = ui->listWidgetSubfolders->currentRow();
     PredictorOutputFolder = path(ui->lineEditPredictorOutputFolder->text().toStdString());
 
     if(ui->checkBoxUseSubfolders->checkState())
     {
         PredictorOutputFolder.append(ui->lineEditFeatureFamily->text().toStdString());
-        PredictorOutputFolder.append(ui->lineEditImageClass->text().toStdString());
+        PredictorOutputFolder.append(SubfoldersNamesVector[subfolderIndex]);
     }
 
     if (!exists(PredictorOutputFolder))
@@ -255,6 +324,7 @@ void MainWindow::on_pushButtonOpenPredictorOutputFolder_clicked()
     }
     else
         return;
+    ReadPredictorSubfolders();
     OpenPredictorOutputFotder();
 }
 
@@ -324,7 +394,7 @@ void MainWindow::on_pushButtonProcessAllFiles_clicked()
     }
     for(vector<string>::iterator iFileNamesVector = PredictorOutputFileNamesVector.begin(); iFileNamesVector != PredictorOutputFileNamesVector.end(); iFileNamesVector++)
     {
-        OutText += ShowResult(*iFileNamesVector, 0);
+        OutText += ShowResult(*iFileNamesVector, 0) + "\n";
     }
 
     path OutFile = OutputFolder;
@@ -334,7 +404,7 @@ void MainWindow::on_pushButtonProcessAllFiles_clicked()
         OutFile.append(ui->lineEditFileName->text().toStdString() +
                        ui->lineEditFeatureFamily->text().toStdString() +
                        string("_") +
-                       ui->lineEditImageClass->text().toStdString() +
+                       SubfoldersNamesVector[ui->listWidgetSubfolders->currentRow()] +
                        ".xls");
     }
     else
